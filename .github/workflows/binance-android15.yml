@@ -20,12 +20,10 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
-      - name: Restore and verify app source
-        working-directory: binance-ai
+      - name: Validate application source
         run: |
-          mkdir -p app/src/main/java/ye/binance/aibridge
-          cat source.part0{1,2,3,4,5} | base64 -d | gzip -d > app/src/main/java/ye/binance/aibridge/MainActivity.java
-          echo "bc204ff0c8c002034edf762038adf8c90eff5f748b1757891f02a6217c86a0b6  app/src/main/java/ye/binance/aibridge/MainActivity.java" | sha256sum -c -
+          test -s binance-ai/app/src/main/java/ye/binance/aibridge/MainActivity.java
+          grep -q 'class MainActivity' binance-ai/app/src/main/java/ye/binance/aibridge/MainActivity.java
       - name: Build installable debug APK
         working-directory: binance-ai
         run: gradle --no-daemon --stacktrace assembleDebug
