@@ -1,0 +1,40 @@
+name: Build Binance AI Bridge Android 15
+on:
+  push:
+    branches: [binance-ai-android15]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v4
+      - name: Install Android SDK 35
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Restore and verify app source
+        working-directory: binance-ai
+        run: |
+          mkdir -p app/src/main/java/ye/binance/aibridge
+          cat source.part0{1,2,3,4,5} | base64 -d | gzip -d > app/src/main/java/ye/binance/aibridge/MainActivity.java
+          echo "bc204ff0c8c002034edf762038adf8c90eff5f748b1757891f02a6217c86a0b6  app/src/main/java/ye/binance/aibridge/MainActivity.java" | sha256sum -c -
+      - name: Build installable debug APK
+        working-directory: binance-ai
+        run: gradle --no-daemon --stacktrace assembleDebug
+      - name: Verify APK
+        run: |
+          test -s binance-ai/app/build/outputs/apk/debug/app-debug.apk
+          sha256sum binance-ai/app/build/outputs/apk/debug/app-debug.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Binance-AI-Bridge-Android15-APK
+          path: binance-ai/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
