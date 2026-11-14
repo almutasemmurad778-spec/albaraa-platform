@@ -231,14 +231,10 @@ public final class MainActivity extends Activity {
             try{
                 JSONObject acc=new JSONObject(binanceCall("GET","/api/v3/account",new JSONObject(),true,bk,bs));
                 status("نجح الاتصال وقراءة الحساب.");
-                show("تم الاتصال بنجاح بحساب Binance.
-نوع الحساب: "+acc.optString("accountType","غير محدد")+
-                    "
-إمكانية التداول: "+acc.optBoolean("canTrade",false)+
-                    "
-إمكانية السحب: "+acc.optBoolean("canWithdraw",false)+
-                    "
-لا تعني هذه النتيجة أن كل أمر سيتاح؛ تخضع العمليات لصلاحيات Binance وشروطها.");
+                show("تم الاتصال بنجاح بحساب Binance.\nنوع الحساب: "+acc.optString("accountType","غير محدد")+
+                    "\nإمكانية التداول: "+acc.optBoolean("canTrade",false)+
+                    "\nإمكانية السحب: "+acc.optBoolean("canWithdraw",false)+
+                    "\nلا تعني هذه النتيجة أن كل أمر سيتاح؛ تخضع العمليات لصلاحيات Binance وشروطها.");
             }catch(Exception e){status("فشل اختبار الربط.");show("خطأ Binance: "+safeError(e.getMessage()));}
             finally{running=false;ui.post(()->sendButton.setEnabled(true));}
         });
