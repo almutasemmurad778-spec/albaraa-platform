@@ -1,0 +1,40 @@
+name: Build Binance AI Windows EXE
+on:
+  push:
+    branches: [binance-ai-windows]
+    paths:
+      - 'binance-ai-windows/**'
+      - '.github/workflows/binance-windows.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  package:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Syntax and tests
+        working-directory: binance-ai-windows
+        run: |
+          python -m py_compile app.py bridge.py
+          python -m unittest discover -s tests -v
+      - name: Install packaging tools
+        run: python -m pip install --disable-pip-version-check pyinstaller
+      - name: Build Windows EXE
+        working-directory: binance-ai-windows
+        run: pyinstaller --noconfirm --clean --onefile --windowed --name Binance_AI_Desktop app.py
+      - name: Verify binary
+        shell: pwsh
+        run: |
+          $p="binance-ai-windows/dist/Binance_AI_Desktop.exe"
+          if (!(Test-Path $p)) { throw "Missing EXE" }
+          Get-Item $p | Select-Object Name,Length
+          Get-FileHash $p -Algorithm SHA256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Binance-AI-Desktop-Windows
+          path: binance-ai-windows/dist/Binance_AI_Desktop.exe
+          if-no-files-found: error
